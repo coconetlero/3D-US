@@ -25,19 +25,23 @@
 
 #include <UltrasoundSegmentationDefs.h>
 
-// itk includes
+// ITK includes
 #include <itkImage.h>
 
-//vtk includes 
+// VTK includes 
 #include <vtkImageData.h>
 #include <vtkSmartPointer.h>
 
-//MRML includes 
+// MRML includes 
 #include <vtkMRMLVolumeNode.h>
 
 // VNL includes
 #include <vnl/vnl_vector.h>
 #include <vnl/vnl_matrix.h>
+
+// STD includes
+#include <iostream>
+#include <fstream>
 
 
 class qSlicerUltrasoundSegmentationModuleWidgetPrivate;
@@ -48,122 +52,118 @@ class vtkMRMLNode;
 class Q_SLICER_QTMODULES_ULTRASOUNDSEGMENTATION_EXPORT qSlicerUltrasoundSegmentationModuleWidget :
 public qSlicerAbstractModuleWidget
 {
-
-    Q_OBJECT
+  Q_OBJECT
 
 public:
 
-    typedef qSlicerAbstractModuleWidget Superclass;
-    qSlicerUltrasoundSegmentationModuleWidget(QWidget *parent = 0);
-    virtual ~qSlicerUltrasoundSegmentationModuleWidget();
+  typedef qSlicerAbstractModuleWidget Superclass;
+  qSlicerUltrasoundSegmentationModuleWidget(QWidget *parent = 0);
+  virtual ~qSlicerUltrasoundSegmentationModuleWidget();
 
 public slots:
 
-    /** \brief */
-    void enableTraining();
-    /** \brief */
-    void loadTrainingFile();
-    /** \brief */
-    void train();
-    /** \brief */
-    void saveTraining();
-    /** \brief */
-    void segment();
+  /** \brief */
+  void enableTraining();
+  /** \brief */
+  void loadTrainingFile();
+  /** \brief */
+  void train();
+  /** \brief */
+  void saveTraining();
+  /** \brief */
+  void segment();
 
 
 protected:
-    QScopedPointer<qSlicerUltrasoundSegmentationModuleWidgetPrivate> d_ptr;
+  QScopedPointer<qSlicerUltrasoundSegmentationModuleWidgetPrivate> d_ptr;
 
-    virtual void setup();
+  virtual void setup();
 
 protected slots:
 
-    /** \brief */
-    void onSourceSegmentSelected();
+  /** \brief */
+  void onSourceSegmentSelected();
 
-    void onSourceTrainSelected();
+  void onSourceTrainSelected();
 
-    void onBoneLabelSelected();
+  void onBoneLabelSelected();
 
-    void onTissueLabelSelected();
+  void onTissueLabelSelected();
 
-    void onShadowLabelSelected();
+  void onShadowLabelSelected();
 
 
 private:
-    Q_DECLARE_PRIVATE(qSlicerUltrasoundSegmentationModuleWidget);
-    Q_DISABLE_COPY(qSlicerUltrasoundSegmentationModuleWidget);
+  Q_DECLARE_PRIVATE(qSlicerUltrasoundSegmentationModuleWidget);
+  Q_DISABLE_COPY(qSlicerUltrasoundSegmentationModuleWidget);
 
-    /** \brief input segmentation volume node */
-    vtkSmartPointer<vtkMRMLVolumeNode> InputSegmentationNode;
+  /** \brief input segmentation volume node */
+  vtkSmartPointer<vtkMRMLVolumeNode> InputSegmentationNode;
 
-    /** \brief the input images as an image data */
-    vtkSmartPointer<vtkImageData> InputVolume;
+  /** \brief the input images as an image data */
+  vtkSmartPointer<vtkImageData> InputVolume;
 
-    /** \brief the input images as ITK image */
-    FloatImageType::Pointer InputImage;
+  /** \brief the input images as ITK image */
+  FloatImageType::Pointer InputImage;
 
-    
-    // -------------------------------------------------
-    
-    float P_bone;
-    float P_tissue;
-    float P_shadow;
-    
-    vnl_vector<float> BoneMean;
-    vnl_vector<float> TissueMean;
-    vnl_vector<float> ShadowMean;
 
-    vnl_matrix<float> BoneCov;
-    vnl_matrix<float> TissueCov;
-    vnl_matrix<float> ShadowCov;
-    
-       
-    // -------------------------------------------------
-    
-    
-    
-    
-    
-    
-    
-    
-    /**
-     * \brief   
-     */
-    vtkSmartPointer<vtkImageData> toVTKImageData(FloatImageType::Pointer itkImage);
+  // -------------------------------------------------
 
-    /**
-     * \brief   
-     */
-    vtkSmartPointer<vtkImageData> toVTKMaskImageData(MaskImageType::Pointer itkImage);
+  float P_bone;
+  float P_tissue;
+  float P_shadow;
 
-    /**
-     * \brief
-     */
-    FloatImageType::Pointer toITKImage(vtkSmartPointer<vtkImageData> vtkImage);
+  vnl_vector<float> BoneMean;
+  vnl_vector<float> TissueMean;
+  vnl_vector<float> ShadowMean;
 
-    /**
-     * \brief finds the covariance matrix
-     */
-    vnl_matrix<float> cov(vnl_matrix<float> observations);
-    
-    /**
-     * \brief
-     * @param itkImage
-     * @param sigma_min
-     * @param sigma_max
-     * @param alpha
-     * @param beta
-     * @param gamma
-     * @param scaleSteps
-     * @param isWhite
-     * @return 
-     */
-     FloatImageType::Pointer enhance(FloatImageType::Pointer itkImage, 
-    int type, float sigma_min, float sigma_max, float alpha, float beta, float gamma, 
-    int scaleSteps, bool isWhite);
-    
+  vnl_matrix<float> BoneCov;
+  vnl_matrix<float> TissueCov;
+  vnl_matrix<float> ShadowCov;
+
+
+  // -------------------------------------------------
+
+
+  /**
+   * \brief   
+   */
+  vtkSmartPointer<vtkImageData> toVTKImageData(FloatImageType::Pointer itkImage);
+
+  /**
+   * \brief   
+   */
+  vtkSmartPointer<vtkImageData> toVTKMaskImageData(MaskImageType::Pointer itkImage);
+
+  /**
+   * \brief
+   */
+  FloatImageType::Pointer toITKImage(vtkSmartPointer<vtkImageData> vtkImage);
+
+  /**
+   * \brief finds the covariance matrix
+   */
+  vnl_matrix<float> cov(vnl_matrix<float> observations);
+
+  /**
+   * \brief
+   * @param itkImage
+   * @param sigma_min
+   * @param sigma_max
+   * @param alpha
+   * @param beta
+   * @param gamma
+   * @param scaleSteps
+   * @param isWhite
+   * @return 
+   */
+  FloatImageType::Pointer enhance(FloatImageType::Pointer itkImage,
+                                  int type, float sigma_min, float sigma_max, float alpha, float beta, float gamma,
+                                  int scaleSteps, bool isWhite);
+  
+  // stream for write logs messages
+  std::ofstream m_stream;
+
 };
 
 #endif
