@@ -532,16 +532,15 @@ MaskImageType::Pointer FeatureRegionGrowing::SeedPointsToImage(std::vector< int 
 {
     // Create the output image
     MaskImageType::Pointer outputImage = this->CreateEmptyImage();
-    MaskImageType::RegionType region = outputImage->GetLargestPossibleRegion();
 
     // fill output image
     typedef itk::ImageRegionIterator<MaskImageType> IteratorImageType;
-    IteratorImageType imageIterator(outputImage, region);
+    IteratorImageType imageIterator(outputImage, outputImage->GetLargestPossibleRegion();
     int idx = 0;
     int vectorIdx = 0;
     while (!imageIterator.IsAtEnd())
     {
-        if (seedPoints[vectorIdx] == idx)
+        if (vectorIdx < seedPoints.size() && seedPoints[vectorIdx] == idx)
         {
             imageIterator.Set(1);
             vectorIdx++;
