@@ -17,8 +17,6 @@
 
 // Qt includes
 #include <QDebug>
-#include <QtGui>
-#include <QMessageBox>
 
 // SlicerQt includes
 #include "qSlicerUltrasoundSegmentationModuleWidget.h"
@@ -32,17 +30,18 @@
 // ITK includes
 #include <itkRescaleIntensityImageFilter.h>
 
+
 //MRML includes 
 #include <vtkMRMLNode.h>
 #include <vtkMRMLVolumeNode.h>
 #include <vtkMRMLScalarVolumeNode.h>
 
+
 // VNL includes
 #include <vnl/vnl_vector.h>
 #include <vnl/vnl_matrix.h>
 
-// STD includes
-#include <ios>
+#include <iostream>
 
 // glue inlcudes
 #include "../VtkGlue/include/itkImageToVTKImageFilter.h"
@@ -56,7 +55,6 @@
 //-----------------------------------------------------------------------------
 /// \ingroup Slicer_QtModules_ExtensionTemplate
 
-
 class qSlicerUltrasoundSegmentationModuleWidgetPrivate : public Ui_qSlicerUltrasoundSegmentationModuleWidget
 {
 
@@ -69,26 +67,28 @@ public:
 
 //-----------------------------------------------------------------------------
 
-
-qSlicerUltrasoundSegmentationModuleWidgetPrivate::qSlicerUltrasoundSegmentationModuleWidgetPrivate() { }
+qSlicerUltrasoundSegmentationModuleWidgetPrivate::qSlicerUltrasoundSegmentationModuleWidgetPrivate()
+{
+}
 
 //-----------------------------------------------------------------------------
 // qSlicerUltrasoundSegmentationModuleWidget methods
 
 //-----------------------------------------------------------------------------
 
-
 qSlicerUltrasoundSegmentationModuleWidget::qSlicerUltrasoundSegmentationModuleWidget(QWidget* _parent)
 : Superclass(_parent)
-, d_ptr(new qSlicerUltrasoundSegmentationModuleWidgetPrivate) { }
+, d_ptr(new qSlicerUltrasoundSegmentationModuleWidgetPrivate)
+{
+}
 
 //-----------------------------------------------------------------------------
 
-
-qSlicerUltrasoundSegmentationModuleWidget::~qSlicerUltrasoundSegmentationModuleWidget() { }
+qSlicerUltrasoundSegmentationModuleWidget::~qSlicerUltrasoundSegmentationModuleWidget()
+{
+}
 
 //-----------------------------------------------------------------------------
-
 
 void qSlicerUltrasoundSegmentationModuleWidget::setup()
 {
@@ -118,18 +118,15 @@ void qSlicerUltrasoundSegmentationModuleWidget::setup()
             this, SLOT(onSourceSegmentSelected()));
 
 
-    //this->m_stream.open ("us_seg_log.txt", std::ios_base::app | std::ios_base::out);
-    //this->m_stream << "\n --- Start Ultrasound segmentation debug --- " << std::endl;
-
 }
 
 //-----------------------------------------------------------------------------
-
 
 void qSlicerUltrasoundSegmentationModuleWidget::enableTraining()
 {
     Q_D(qSlicerUltrasoundSegmentationModuleWidget);
     bool useFile = d->useFileCheckBox->isChecked();
+    std::cout << "use file " << useFile << std::endl;
     if (useFile)
     {
         d->trainingGroupBox->setEnabled(false);
@@ -141,6 +138,7 @@ void qSlicerUltrasoundSegmentationModuleWidget::enableTraining()
         d->boneMRMLNodeComboBox->setEnabled(true);
         d->tissueMRMLNodeComboBox->setEnabled(true);
         d->shadowMRMLNodeComboBox->setEnabled(true);
+
         d->loadFileButton->setEnabled(false);
         d->fileLineEdit->setEnabled(false);
     }
@@ -148,91 +146,19 @@ void qSlicerUltrasoundSegmentationModuleWidget::enableTraining()
 
 //-----------------------------------------------------------------------------
 
-
-void qSlicerUltrasoundSegmentationModuleWidget::loadTrainingFile() { }
-
-//-----------------------------------------------------------------------------
-
-
-void qSlicerUltrasoundSegmentationModuleWidget::saveTraining()
+void qSlicerUltrasoundSegmentationModuleWidget::loadTrainingFile()
 {
-    std::cout << "on write a file" << std::endl;
 
-    if (this->P_bone != NULL && this->P_tissue != NULL && this->P_shadow != NULL)
-    {
-
-        QString fileName = QFileDialog::getSaveFileName(this, tr("Save Tranning File"),
-                                                        QDir::currentPath(), tr("Text (*.txt *.xml)"));
-
-        QFile file(fileName);
-        if (!file.open(QIODevice::WriteOnly))
-        {
-            QMessageBox::warning(NULL, "Test", "Unable to open: " + fileName, "OK");
-            return;
-        }
-
-        
-        QTextStream stream(&file);
-        stream << this->P_bone << "\n\n";        
-        stream << this->P_tissue << "\n\n";        
-        stream << this->P_shadow << "\n\n";        
-        stream << "\n";        
-        for (unsigned int i = 0; i < BoneMean.size(); i++)
-        {
-            stream << this->BoneMean[i] << "\t";
-            std::cout << this->BoneMean[i] << "\t";
-        }
-        stream << "\n\n";        
-        for (unsigned int i = 0; i < TissueMean.size(); i++)
-        {
-            stream << this->TissueMean[i] << "\t";
-            std::cout << this->TissueMean[i] << "\t";
-        }
-        stream << "\n\n";        
-        for (unsigned int i = 0; i < ShadowMean.size(); i++)
-        {
-            stream << this->ShadowMean[i] << "\t";
-            std::cout << this->ShadowMean[i] << "\t";
-        }
-        stream << "\n\n";        
-        for (unsigned int i = 0; i < this->BoneCov.rows(); i++)
-        {
-            for (unsigned int j = 0; j < this->BoneCov.cols(); j++)
-            {
-                stream << this->BoneCov[i][j] << "\t";                
-            }
-            stream << "\n";            
-        }
-        stream << "\n";        
-        for (unsigned int i = 0; i < this->TissueCov.rows(); i++)
-        {
-            for (unsigned int j = 0; j < this->TissueCov.cols(); j++)
-            {
-                stream << this->TissueCov[i][j] << "\t";                
-            }
-            stream << "\n";            
-        }
-        stream << "\n";        
-        for (unsigned int i = 0; i < this->ShadowCov.rows(); i++)
-        {
-            for (unsigned int j = 0; j < this->ShadowCov.cols(); j++)
-            {
-                stream << this->ShadowCov[i][j] << "\t";                
-            }
-            stream << "\n";            
-        }
-        stream << "\n";
-        
-        file.close();
-    }
-    else
-    {
-        std::cout << "First do the tranning step" << std::endl;
-    }
 }
 
 //-----------------------------------------------------------------------------
 
+void qSlicerUltrasoundSegmentationModuleWidget::saveTraining()
+{
+
+}
+
+//-----------------------------------------------------------------------------
 
 void qSlicerUltrasoundSegmentationModuleWidget::train()
 {
@@ -285,14 +211,10 @@ void qSlicerUltrasoundSegmentationModuleWidget::train()
         }
     }
 
-
+    
     vtkNew<vtkImageShiftScale> shiftScaleFilter;
     shiftScaleFilter->SetOutputScalarTypeToFloat();
-#if VTK_MAJOR_VERSION <= 5
-    shiftScaleFilter->SetInput(sourceVolume.GetPointer());
-#else
     shiftScaleFilter->SetInputData(sourceVolume.GetPointer());
-#endif
     shiftScaleFilter->Update();
 
     FloatImageType::Pointer sourceImage = this->toITKImage(shiftScaleFilter->GetOutput());
@@ -304,7 +226,7 @@ void qSlicerUltrasoundSegmentationModuleWidget::train()
     float alpha = d->alphaSpinBox->value();
     float beta = d->betaSpinBox->value();
     float gamma = d->gammaSpinBox->value();
-    //  bool isWhite = d->isBrightCheckBox->isChecked();
+    bool isWhite = d->isBrightCheckBox->isChecked();
 
     // enhance image     
     HessianFeatures hessianFeatures;
@@ -332,11 +254,11 @@ void qSlicerUltrasoundSegmentationModuleWidget::train()
     vtkSmartPointer<vtkImageData> enhancedVolume = toVTKImageData(objectness);
     std::cout << "conversion to vtk DONE " << std::endl;
 
-
-
-
-
-
+    
+    
+    
+    
+    
     std::cout << "find trainning values" << std::endl;
 
     int boneSize = 0;
@@ -386,9 +308,9 @@ void qSlicerUltrasoundSegmentationModuleWidget::train()
     int bIdx = 0;
     int tIdx = 0;
     int sIdx = 0;
-    //        vnl_matrix<float> boneObs(boneSize, 4);
-    //        vnl_matrix<float> tissueObs(tissueSize, 4);
-    //        vnl_matrix<float> shadowObs(shadowSize, 4);
+//        vnl_matrix<float> boneObs(boneSize, 4);
+//        vnl_matrix<float> tissueObs(tissueSize, 4);
+//        vnl_matrix<float> shadowObs(shadowSize, 4);
 
     vnl_matrix<float> boneObs(boneSize, 2);
     vnl_matrix<float> tissueObs(tissueSize, 2);
@@ -404,26 +326,26 @@ void qSlicerUltrasoundSegmentationModuleWidget::train()
             {
                 unsigned char * sourcePixel = static_cast<unsigned char *> (sourceVolume->GetScalarPointer(x, y, z));
                 float * enhancedPixel = static_cast<float *> (enhancedVolume->GetScalarPointer(x, y, z));
-
+                
                 unsigned char * bonePixel = static_cast<unsigned char *> (boneVolume->GetScalarPointer(x, y, z));
                 unsigned char * tissuePixel = static_cast<unsigned char *> (tissueVolume->GetScalarPointer(x, y, z));
                 unsigned char * shadowPixel = static_cast<unsigned char *> (shadowVolume->GetScalarPointer(x, y, z));
 
                 if (bonePixel[0] != 0)
                 {
-                    //                                        float v[] = {x, y, z, sourcePixel[0]};
-                    //                                        vnl_vector<float> row(4, 4, v);
+//                                        float v[] = {x, y, z, sourcePixel[0]};
+//                                        vnl_vector<float> row(4, 4, v);
 
                     float v[] = {sourcePixel[0], enhancedPixel[0]};
                     vnl_vector<float> row(2, 2, v);
-
+ 
                     boneObs.set_row(bIdx, row);
                     ++bIdx;
                 }
                 if (tissuePixel[0] != 0)
                 {
-                    //                                        float v[] = {x, y, z, sourcePixel[0]};
-                    //                                        vnl_vector<float> row(4, 4, v);
+//                                        float v[] = {x, y, z, sourcePixel[0]};
+//                                        vnl_vector<float> row(4, 4, v);
 
                     float v[] = {sourcePixel[0], enhancedPixel[0]};
                     vnl_vector<float> row(2, 2, v);
@@ -433,8 +355,8 @@ void qSlicerUltrasoundSegmentationModuleWidget::train()
                 }
                 if (shadowPixel[0] != 0)
                 {
-                    //                                        float v[] = {x, y, z, sourcePixel[0]};
-                    //                                        vnl_vector<float> row(4, 4, v);
+//                                        float v[] = {x, y, z, sourcePixel[0]};
+//                                        vnl_vector<float> row(4, 4, v);
 
                     float v[] = {sourcePixel[0], enhancedPixel[0]};
                     vnl_vector<float> row(2, 2, v);
@@ -473,37 +395,47 @@ void qSlicerUltrasoundSegmentationModuleWidget::train()
 
 //-----------------------------------------------------------------------------
 
-
-void qSlicerUltrasoundSegmentationModuleWidget::onSourceSegmentSelected() { }
-
-//-----------------------------------------------------------------------------
+void qSlicerUltrasoundSegmentationModuleWidget::onSourceSegmentSelected()
+{
 
 
-void qSlicerUltrasoundSegmentationModuleWidget::onSourceTrainSelected() { }
+}
 
 //-----------------------------------------------------------------------------
 
+void qSlicerUltrasoundSegmentationModuleWidget::onSourceTrainSelected()
+{
 
-void qSlicerUltrasoundSegmentationModuleWidget::onBoneLabelSelected() { }
-
-//-----------------------------------------------------------------------------
-
-
-void qSlicerUltrasoundSegmentationModuleWidget::onTissueLabelSelected() { }
+}
 
 //-----------------------------------------------------------------------------
 
+void qSlicerUltrasoundSegmentationModuleWidget::onBoneLabelSelected()
+{
 
-void qSlicerUltrasoundSegmentationModuleWidget::onShadowLabelSelected() { }
+}
 
 //-----------------------------------------------------------------------------
 
+void qSlicerUltrasoundSegmentationModuleWidget::onTissueLabelSelected()
+{
+
+}
+
+//-----------------------------------------------------------------------------
+
+void qSlicerUltrasoundSegmentationModuleWidget::onShadowLabelSelected()
+{
+
+}
+
+//-----------------------------------------------------------------------------
 
 void qSlicerUltrasoundSegmentationModuleWidget::segment()
 {
     Q_D(qSlicerUltrasoundSegmentationModuleWidget);
 
-    vtkNew<vtkImageData> inputVolume;
+    vtkSmartPointer<vtkImageData> inputVolume;
 
     // get input volume 
     vtkMRMLNode *node = d->sourceSegmentMRMLNodeComboBox->currentNode();
@@ -515,18 +447,15 @@ void qSlicerUltrasoundSegmentationModuleWidget::segment()
         {
             std::cout << "loading input volume in scene" << std::endl;
             this->InputSegmentationNode = inputVolumeNode;
-            inputVolume->DeepCopy(inputVolumeNode->GetImageData());
+
+            inputVolume = inputVolumeNode->GetImageData();
+
         }
     }
 
     vtkNew<vtkImageShiftScale> shiftScaleFilter;
     shiftScaleFilter->SetOutputScalarTypeToFloat();
-
-#if VTK_MAJOR_VERSION <= 5
-    shiftScaleFilter->SetInput(inputVolume.GetPointer());
-#else
-    shiftScaleFilter->SetInputData(inputVolume.GetPointer());
-#endif
+    shiftScaleFilter->SetInputData(inputVolume);
     shiftScaleFilter->Update();
 
     this->InputImage = this->toITKImage(shiftScaleFilter->GetOutput());
@@ -538,7 +467,7 @@ void qSlicerUltrasoundSegmentationModuleWidget::segment()
     float alpha = d->alphaSpinBox->value();
     float beta = d->betaSpinBox->value();
     float gamma = d->gammaSpinBox->value();
-    //  bool isWhite = d->isBrightCheckBox->isChecked();
+    bool isWhite = d->isBrightCheckBox->isChecked();
 
     // enhance image     
     HessianFeatures hessianFeatures;
@@ -596,8 +525,8 @@ void qSlicerUltrasoundSegmentationModuleWidget::segment()
 
     std::cout << "start region growing" << std::endl;
     FeatureRegionGrowing regionGrow;
-    //    regionGrow.SetImage(objectness);
-    //    regionGrow.SetImage(this->InputImage);
+//    regionGrow.SetImage(objectness);
+//    regionGrow.SetImage(this->InputImage);
     regionGrow.SetImage(this->InputImage);
     regionGrow.SetEnhancedImage(objectness);
     regionGrow.SetEigenvectors(hessianFeatures.GetEigenvectors());
@@ -607,9 +536,9 @@ void qSlicerUltrasoundSegmentationModuleWidget::segment()
     MaskImageType::Pointer seeds_Image = regionGrow.SeedPointsToImage(seeds);
 
     MaskImageType::Pointer grow_Image = regionGrow.Grow(seeds_Image,
-                                                        this->P_bone, this->P_tissue, this->P_shadow,
-                                                        this->BoneMean, this->TissueMean, this->ShadowMean,
-                                                        this->BoneCov, this->TissueCov, this->ShadowCov);
+            this->P_bone, this->P_tissue, this->P_shadow,
+            this->BoneMean, this->TissueMean, this->ShadowMean,
+            this->BoneCov, this->TissueCov, this->ShadowCov);
 
     // convert to vtkImage
     vtkSmartPointer<vtkImageData> segmentVolume = toVTKMaskImageData(grow_Image);
@@ -636,7 +565,6 @@ void qSlicerUltrasoundSegmentationModuleWidget::segment()
 
 //-----------------------------------------------------------------------------
 
-
 vtkSmartPointer<vtkImageData> qSlicerUltrasoundSegmentationModuleWidget
 ::toVTKImageData(FloatImageType::Pointer itkImage)
 {
@@ -648,13 +576,12 @@ vtkSmartPointer<vtkImageData> qSlicerUltrasoundSegmentationModuleWidget
     vtkSmartPointer<vtkImageData> outputImage = vtkSmartPointer<vtkImageData>::New();
     outputImage->Initialize();
     outputImage->DeepCopy(vtkConnector->GetImporter()->GetOutput());
-    //    outputImage->Update();
+//    outputImage->Update();
 
     return outputImage;
 }
 
 //-----------------------------------------------------------------------------
-
 
 vtkSmartPointer<vtkImageData> qSlicerUltrasoundSegmentationModuleWidget
 ::toVTKMaskImageData(MaskImageType::Pointer itkImage)
@@ -667,14 +594,13 @@ vtkSmartPointer<vtkImageData> qSlicerUltrasoundSegmentationModuleWidget
     vtkSmartPointer<vtkImageData> outputImage = vtkSmartPointer<vtkImageData>::New();
     outputImage->Initialize();
     outputImage->DeepCopy(vtkConnector->GetImporter()->GetOutput());
-    //    outputImage->Update();
+//    outputImage->Update();
 
     return outputImage;
 }
 
 
 //-----------------------------------------------------------------------------
-
 
 FloatImageType::Pointer qSlicerUltrasoundSegmentationModuleWidget
 ::toITKImage(vtkSmartPointer<vtkImageData> vtkImage)
@@ -693,7 +619,6 @@ FloatImageType::Pointer qSlicerUltrasoundSegmentationModuleWidget
 
 
 //-----------------------------------------------------------------------------
-
 
 vnl_matrix<float> qSlicerUltrasoundSegmentationModuleWidget::cov(vnl_matrix<float> observations)
 {

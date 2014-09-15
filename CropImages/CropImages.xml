@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<executable>
+    <category>3DFreehandUS</category>
+    <title>CropImages</title>
+    <description><![CDATA[This is a CLI module that can be bundled in an extension]]></description>
+    <version>0.0.1</version>
+    <documentation-url>http://www.slicer.org/slicerWiki/index.php/Documentation/4.3/Modules/CropImages</documentation-url>
+    <license>Slicer</license>
+    <contributor>Zian Fanti (CCADET, UANM)</contributor>
+    <acknowledgements>This work was partially funded by CONACyT grant</acknowledgements>
+    <parameters>
+        <label>IO</label>
+        <description>Input/output parameters</description>
+        <image>
+            <name>inputSequence</name>
+            <label>Input Sequence</label>
+            <channel>input</channel>
+            <index>0</index>
+            <description>Input US Images</description>
+        </image>
+        <image>
+            <name>outputSequence</name>
+            <label>Output Sequence</label>
+            <channel>output</channel>
+            <index>1</index>
+            <description>Croped US Images</description>
+        </image>       
+    </parameters>
+    <parameters>
+        <label>Size</label>
+        <description>Size of the Depth/Range</description>
+        <integer-enumeration>
+            <name>size</name>
+            <label>Depth/Range</label>
+            <default>4</default>
+            <element>4</element>
+            <element>5</element>
+            <element>6</element>
+            <element>8</element>
+            <longflag>size</longflag>
+            <description>Size of the depth/range selected in the Ultrasound system.</description>
+        </integer-enumeration>
+    </parameters>
+</executable>
