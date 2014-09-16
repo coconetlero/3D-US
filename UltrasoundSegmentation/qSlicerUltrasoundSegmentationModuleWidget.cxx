@@ -149,7 +149,110 @@ void qSlicerUltrasoundSegmentationModuleWidget::enableTraining()
 //-----------------------------------------------------------------------------
 
 
-void qSlicerUltrasoundSegmentationModuleWidget::loadTrainingFile() { }
+void qSlicerUltrasoundSegmentationModuleWidget::loadTrainingFile()
+{
+
+    QString trainingFilename =
+            QFileDialog::getOpenFileName(this,
+                                         tr("Load Traning File"), QDir::currentPath());
+
+    if (!trainingFilename.isEmpty())
+    {
+        std::cout << "load tranning file" << std::endl;
+
+        QFile file(trainingFilename);
+        if (!file.open(QIODevice::ReadOnly))
+            return;
+
+        QTextStream stream(&file);
+        QString line;
+
+
+        line = stream.readLine();
+        this->P_bone = line.toFloat();
+        line = stream.readLine();
+        this->P_tissue = line.toFloat();
+        line = stream.readLine();
+        this->P_shadow = line.toFloat();
+
+        std::cout << P_bone << " " << P_tissue << " " << P_shadow << std::endl;
+        stream.readLine();
+
+        line = stream.readLine();        
+        QStringList lineList = line.split('\t');
+        int dataSize = lineList.size() - 1;
+        this->BoneMean.set_size(dataSize);
+        for (int i = 0; i < dataSize; i++)
+        {
+            this->BoneMean.put(i, lineList.at(i).toFloat());
+        }
+
+        line = stream.readLine();
+        lineList = line.split('\t');
+        this->TissueMean.set_size(dataSize);
+        for (int i = 0; i < dataSize; i++)
+        {
+            this->TissueMean.put(i, lineList.at(i).toFloat());
+        }
+
+        line = stream.readLine();
+        lineList = line.split('\t');
+        this->ShadowMean.set_size(dataSize);
+        for (int i = 0; i < dataSize; i++)
+        {
+            this->ShadowMean.put(i, lineList.at(i).toFloat());
+        }
+
+
+        std::cout << "\n" << BoneMean << "\n " << TissueMean << "\n " << ShadowMean << std::endl;
+        stream.readLine();
+
+        this->BoneCov.set_size(dataSize, dataSize);
+        this->TissueCov.set_size(dataSize, dataSize);
+        this->ShadowCov.set_size(dataSize, dataSize);
+
+        for (int i = 0; i < BoneCov.rows(); i++)
+        {
+            line = stream.readLine();
+            lineList = line.split('\t');
+            for (int j = 0; j < BoneCov.cols(); j++)
+            {
+                this->BoneCov.put(i, j, lineList.at(j).toFloat());
+            }
+        }
+        stream.readLine();
+        for (int i = 0; i < TissueCov.rows(); i++)
+        {
+            line = stream.readLine();
+            lineList = line.split('\t');
+            for (int j = 0; j < TissueCov.cols(); j++)
+            {
+                this->TissueCov.put(i, j, lineList.at(j).toFloat());
+            }
+        }
+        stream.readLine();
+        for (int i = 0; i < ShadowCov.rows(); i++)
+        {
+            line = stream.readLine();
+            lineList = line.split('\t');
+            for (int j = 0; j < ShadowCov.cols(); j++)
+            {
+                this->ShadowCov.put(i, j, lineList.at(j).toFloat());
+            }
+        }
+
+
+        file.close();
+
+
+
+        std::cout << "\n" << BoneCov << "\n " << TissueCov << "\n " << ShadowCov << std::endl;
+
+        // get UI element and modify
+        Q_D(qSlicerUltrasoundSegmentationModuleWidget);
+        d->fileLineEdit->insert(trainingFilename);
+    }
+}
 
 //-----------------------------------------------------------------------------
 
@@ -171,58 +274,57 @@ void qSlicerUltrasoundSegmentationModuleWidget::saveTraining()
             return;
         }
 
-        
+
         QTextStream stream(&file);
-        stream << this->P_bone << "\n\n";        
-        stream << this->P_tissue << "\n\n";        
-        stream << this->P_shadow << "\n\n";        
-        stream << "\n";        
+        stream << this->P_bone << "\n";
+        stream << this->P_tissue << "\n";
+        stream << this->P_shadow << "\n";
+        stream << "\n";
         for (unsigned int i = 0; i < BoneMean.size(); i++)
         {
             stream << this->BoneMean[i] << "\t";
             std::cout << this->BoneMean[i] << "\t";
         }
-        stream << "\n\n";        
+        stream << "\n";
         for (unsigned int i = 0; i < TissueMean.size(); i++)
         {
             stream << this->TissueMean[i] << "\t";
             std::cout << this->TissueMean[i] << "\t";
         }
-        stream << "\n\n";        
+        stream << "\n";
         for (unsigned int i = 0; i < ShadowMean.size(); i++)
         {
             stream << this->ShadowMean[i] << "\t";
             std::cout << this->ShadowMean[i] << "\t";
         }
-        stream << "\n\n";        
+        stream << "\n\n";
         for (unsigned int i = 0; i < this->BoneCov.rows(); i++)
         {
             for (unsigned int j = 0; j < this->BoneCov.cols(); j++)
             {
-                stream << this->BoneCov[i][j] << "\t";                
+                stream << this->BoneCov[i][j] << "\t";
             }
-            stream << "\n";            
+            stream << "\n";
         }
-        stream << "\n";        
+        stream << "\n";
         for (unsigned int i = 0; i < this->TissueCov.rows(); i++)
         {
             for (unsigned int j = 0; j < this->TissueCov.cols(); j++)
             {
-                stream << this->TissueCov[i][j] << "\t";                
+                stream << this->TissueCov[i][j] << "\t";
             }
-            stream << "\n";            
+            stream << "\n";
         }
-        stream << "\n";        
+        stream << "\n";
         for (unsigned int i = 0; i < this->ShadowCov.rows(); i++)
         {
             for (unsigned int j = 0; j < this->ShadowCov.cols(); j++)
             {
-                stream << this->ShadowCov[i][j] << "\t";                
+                stream << this->ShadowCov[i][j] << "\t";
             }
-            stream << "\n";            
+            stream << "\n";
         }
         stream << "\n";
-        
         file.close();
     }
     else
