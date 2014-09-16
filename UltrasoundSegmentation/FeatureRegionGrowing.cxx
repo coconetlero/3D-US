@@ -349,10 +349,10 @@ MaskImageType::Pointer FeatureRegionGrowing::Grow(MaskImageType::Pointer seeds,
 
             if (visited == 0 && IsInBounds)
             {
-                std::cout << "classify voxel (" <<
-                currentIndex[0] << ", " <<
-                currentIndex[1] << ", " <<
-                currentIndex[2] << ") " << std::endl;
+//                std::cout << "classify voxel (" <<
+//                currentIndex[0] << ", " <<
+//                currentIndex[1] << ", " <<
+//                currentIndex[2] << ") " << std::endl;
                 
                 
                 EigenvaluePixelType current_eigenvalues = eigenvaluesIterator.GetPixel(i);
@@ -392,9 +392,9 @@ MaskImageType::Pointer FeatureRegionGrowing::Grow(MaskImageType::Pointer seeds,
                         C_shadow_inv * V_shadow + shadow_const;
 
 
-                std::cout << bone_index(0, 0) << ", " <<
-                        tissue_index(0, 0) << ", " <<
-                        shadow_index(0, 0) << ") " << std::endl;
+//                std::cout << bone_index(0, 0) << ", " <<
+//                        tissue_index(0, 0) << ", " <<
+//                        shadow_index(0, 0) << ") " << std::endl;
 
                 if (bone_index(0, 0) > tissue_index(0, 0) && bone_index(0, 0) > shadow_index(0, 0))
                 {
