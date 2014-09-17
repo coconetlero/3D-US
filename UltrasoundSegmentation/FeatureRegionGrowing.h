@@ -57,8 +57,8 @@ public:
     /**
      * each row are the x,y,z coordinates of the seed points
      */
-    std::vector<int> FindSeedPoints();
-
+    MaskImageType::Pointer FindSeedPoints();
+    
     /**
      * 
      * @param 

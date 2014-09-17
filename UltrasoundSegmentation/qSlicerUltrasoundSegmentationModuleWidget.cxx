@@ -705,8 +705,7 @@ void qSlicerUltrasoundSegmentationModuleWidget::segment()
     regionGrow.SetEigenvectors(hessianFeatures.GetEigenvectors());
     regionGrow.SetEigenvalues(hessianFeatures.GetEigenvalues());
 
-    std::vector<int> seeds = regionGrow.FindSeedPoints();
-    MaskImageType::Pointer seeds_Image = regionGrow.SeedPointsToImage(seeds);
+    MaskImageType::Pointer seeds_Image = regionGrow.FindSeedPoints();
 
     MaskImageType::Pointer grow_Image = regionGrow.Grow(seeds_Image,
                                                         this->P_bone, this->P_tissue, this->P_shadow,

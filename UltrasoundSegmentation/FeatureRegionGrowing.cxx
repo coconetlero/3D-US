@@ -415,7 +415,8 @@ MaskImageType::Pointer FeatureRegionGrowing::Grow(MaskImageType::Pointer seeds,
 
 // ----------------------------------------------------------------------------
 
-std::vector<int> FeatureRegionGrowing::FindSeedPoints()
+
+MaskImageType::Pointer FeatureRegionGrowing::FindSeedPoints()
 {
     // get min and max of the image
     typedef itk::StatisticsImageFilter<FloatImageType> StatisticsImageFilterType;
@@ -454,8 +455,6 @@ std::vector<int> FeatureRegionGrowing::FindSeedPoints()
     imageToHistogramFilter->SetHistogramBinMaximum(upperBound);
     imageToHistogramFilter->SetHistogramSize(size);
 
-
-
     try
     {
         imageToHistogramFilter->Update();
@@ -489,7 +488,6 @@ std::vector<int> FeatureRegionGrowing::FindSeedPoints()
     }
     std::cout << "threshold = " << threshold << std::endl;
 
-
     // iterate over the  hole image to obtain the pixels positions who are seeds
     typedef itk::ImageRegionIterator <FloatImageType> RegionIteratorType;
 
@@ -501,7 +499,7 @@ std::vector<int> FeatureRegionGrowing::FindSeedPoints()
     EigenvalueIteratorType eigenvaluesIterator(this->eigenvalues, region);
 
 
-    std::vector<int> positions;
+    std::vector<int> seedIndex;
 
     int imageIdx = 0;
     imageIt.GoToBegin();
@@ -510,20 +508,41 @@ std::vector<int> FeatureRegionGrowing::FindSeedPoints()
         float value = imageIt.Get();
         if (std::floor(value) > threshold)
         {
-            positions.push_back(imageIdx);
-
-            //            EigenvaluePixelType ev = eigenvaluesIterator.Get();
-            //            std::cout << std::abs(ev[0]) << "\t" << std::abs(ev[1]) << "\t" <<
-            //                    std::abs(ev[2]) << "\t" << imageIt.Get() << std::endl;
+            seedIndex.push_back(imageIdx);            
         }
         ++eigenvaluesIterator;
         ++imageIdx;
         ++imageIt;
     }
 
-    std::cout << "finsh seeds" << std::endl;
+    std::cout << "finsh finding seeds" << std::endl;
 
-    return positions;
+    // Create the output image
+    MaskImageType::Pointer seedsImage = this->CreateEmptyImage();
+
+    // fill output image
+    typedef itk::ImageRegionIterator<MaskImageType> IteratorImageType;
+    IteratorImageType imageIterator(seedsImage, seedsImage->GetLargestPossibleRegion());
+    int idx = 0;
+    int vectorIdx = 0;
+    while (!imageIterator.IsAtEnd())
+    {
+        if (vectorIdx < seedIndex.size() && seedIndex[vectorIdx] == idx)
+        {
+            imageIterator.Set(1);
+            vectorIdx++;
+        }
+        else
+        {
+            imageIterator.Set(0);
+        }
+        ++idx;
+        ++imageIterator;
+    }
+    
+    std::vector<int>().swap(seedIndex);
+    
+    return seedsImage;
 }
 
 // -----------------------------------------------------------------------------
