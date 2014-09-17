@@ -37,6 +37,7 @@ FeatureRegionGrowing::FeatureRegionGrowing(const FeatureRegionGrowing& orig)
 
 FeatureRegionGrowing::~FeatureRegionGrowing()
 {
+    std::cout << "Feature Region Groeing destructor = " << std::endl;
 }
 
 // ----------------------------------------------------------------------------
@@ -403,13 +404,12 @@ MaskImageType::Pointer FeatureRegionGrowing::Grow(MaskImageType::Pointer seeds,
                 }
             }
         }
-
-
-
-
-
         visitedVoxels.erase(visitedVoxels.begin());
     }
+    
+    // clear visitedVoxels vector
+    std::vector< MaskImageType::IndexType >().swap(visitedVoxels);
+    
     return visitedImage;
 }
 
